@@ -1,12 +1,10 @@
-import time
 from typing import Optional
 from datetime import datetime, timedelta
 import discord
 from discord.ext import commands
-from discord.ext.commands import Greedy
-from discord.ext.commands import command, has_permissions, bot_has_permissions
+from discord.ext.commands import Greedy, command, has_permissions, bot_has_permissions
 
-embedColor = 0x74ff38 #  (116, 255, 56)
+embedColor = 0xff0000 #  (255, 0, 0)
 
 
 class Admin(commands.Cog):
