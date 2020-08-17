@@ -16,10 +16,10 @@ class Admin(commands.Cog):
     async def on_ready(self):
         print('Admin Cog Loaded')
 
-    @commands.command(name="clear", aliases=["purge"])
+    @commands.command(name="Clear", aliases=["purge"])
     @bot_has_permissions(manage_messages=True)
     @has_permissions(manage_messages=True)
-    async def clear_messages(self, ctx, targets: Greedy[discord.Member], limit: Optional[int] = 1):
+    async def Clear(self, ctx, targets: Greedy[discord.Member], limit: Optional[int] = 1):
         def _check(message):
             return not len(targets) or message.author in targets
 

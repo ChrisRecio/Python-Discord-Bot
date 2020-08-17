@@ -5,9 +5,9 @@ from discord.ext import commands
 from discord.ext.commands import CommandNotFound
 
 # DOCKER ENV VARIABLE
-# ENV VARIABLE NAME: DiscordBotToken
 
 TOKEN = os.environ['DiscordBotToken']
+PREFIX = os.environ['DiscordBotPrefix']
 
 # USE THIS LOCALLY
 # Looks for BotConfig.json if doesnt exist creates one
@@ -25,8 +25,9 @@ TOKEN = os.environ['DiscordBotToken']
 #     with open('BotConfig.json', 'w') as outfile:
 #         json.dump(data, outfile)
 #         outfile.close()
+# client = commands.Bot(command_prefix='.', case_insensitive=True)
 
-client = commands.Bot(command_prefix='.', case_insensitive=True)
+client = commands.Bot(command_prefix=PREFIX, case_insensitive=True)
 
 
 @client.event

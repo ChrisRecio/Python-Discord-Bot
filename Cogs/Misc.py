@@ -31,13 +31,14 @@ class Misc(commands.Cog):
 
     # Alternates capitalizations
     @commands.command(name="Mock", aliases=["Sarcastic"])
-    async def Mock(self, ctx, input: str):
+    async def Mock(self, ctx, *input):
 
-        wordAsList = list(input)
+        inputString = ' '.join(input)
+        inputStringAsList = [c for c in inputString]
         result = ''
         flip = True
 
-        for i in wordAsList:
+        for i in inputStringAsList:
             if flip:
                 result += i.lower()
             else:
