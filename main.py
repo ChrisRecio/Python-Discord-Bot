@@ -7,26 +7,26 @@ from discord.ext.commands import CommandNotFound
 # DOCKER ENV VARIABLE
 # ENV VARIABLE NAME: DiscordBotToken
 
-# TOKEN = os.environ['DiscordBotToken']
+TOKEN = os.environ['DiscordBotToken']
 
 # USE THIS LOCALLY
 # Looks for BotConfig.json if doesnt exist creates one
-try:
-    with open('BotConfig.json', 'r') as json_file:
-        data = json.load(json_file)
+# try:
+#     with open('BotConfig.json', 'r') as json_file:
+#         data = json.load(json_file)
 
-        TOKEN = data['Token']
-        json_file.close()
+#         TOKEN = data['Token']
+#         json_file.close()
 
-except IOError:
-    print('Please Enter Your Bot Token')
-    TOKEN = input()
-    data = {'Token': TOKEN}
-    with open('BotConfig.json', 'w') as outfile:
-        json.dump(data, outfile)
-        outfile.close()
+# except IOError:
+#     print('Please Enter Your Bot Token')
+#     TOKEN = input()
+#     data = {'Token': TOKEN}
+#     with open('BotConfig.json', 'w') as outfile:
+#         json.dump(data, outfile)
+#         outfile.close()
 
-client = commands.Bot(command_prefix='.', case_insensitive=True)
+# client = commands.Bot(command_prefix='.', case_insensitive=True)
 
 
 @client.event
