@@ -26,7 +26,7 @@ TOKEN = os.environ['DiscordBotToken']
 #         json.dump(data, outfile)
 #         outfile.close()
 
-# client = commands.Bot(command_prefix='.', case_insensitive=True)
+client = commands.Bot(command_prefix='.', case_insensitive=True)
 
 
 @client.event
