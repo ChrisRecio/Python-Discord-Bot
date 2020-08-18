@@ -42,7 +42,8 @@ class UserInfo(commands.Cog):
             '%A, %d. %B %Y @ %H:%M:%S'))
         embed.add_field(name='Join Date', value=target.joined_at.__format__(
             '%A, %d. %B %Y @ %H:%M:%S'))
-        embed.set_footer(text=f'Requested by {ctx.author}')
+        embed.set_footer(
+            text=f'Requested by {ctx.message.author.nick}')
 
         await ctx.send(embed=embed)
 
