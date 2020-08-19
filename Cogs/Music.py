@@ -4,6 +4,7 @@ import lavalink
 from typing import Optional
 import os
 import time
+import re
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -12,6 +13,9 @@ LavaLinkPort = os.environ['LavaLinkPort']
 LavaLinkPassword = os.environ['LavaLinkPassword']
 
 embedColor = 0x7a34eb  # (122, 52, 235)
+
+# LavaLink Docs
+# https://discordpy.readthedocs.io/en/latest/api.html
 
 
 class Music(commands.Cog):
@@ -32,54 +36,113 @@ class Music(commands.Cog):
             if not player.is_connected:
                 player.store('channel', ctx.channel.id)
                 await self.connect_to(ctx.guild.id, str(vc.id))
+                return True
         else:
             await ctx.send('You are not currently connected to a voice channel!')
+            return False
 
     # Plays Requested Song
     @commands.command(name='Play')
     @commands.max_concurrency(1, commands.BucketType.user)
-    async def Play(self, ctx, *, query):
+    async def Play(self, ctx, *, query=None):
+
+        if not query:
+            embed = discord.Embed(
+                title='**Missing Argument**', description='The query argument is required.', color=embedColor)
+            embed.add_field(
+                name='Usage', value='```.play <song name or url>```')
+            await ctx.channel.send(embed=embed)
+            return
+
+        if await self.Join(ctx):
+
+            try:
+                player = self.client.music.player_manager.get(ctx.guild.id)
+
+                query = f'ytsearch:{query}'
+                results = await player.node.get_tracks(query)
+                tracks = results['tracks'][0:1]
+                track = tracks[0]
+
+                ytVideoID = re.match('^[^v]+v=(.{11}).*', track["info"]["uri"])
+
+                embed = discord.Embed(
+                    title=f'**Now Playing**', description=track["info"]["uri"], color=embedColor)
+                embed.set_thumbnail(
+                    url=f'http://img.youtube.com/vi/{ytVideoID.group(1)}/0.jpg')
+                embed.set_footer(
+                    text=f'Requested by: {ctx.message.author.display_name}')
+                await ctx.channel.send(embed=embed)
+
+                time.sleep(1.5)
+
+                player.add(requester=ctx.author.id, track=track)
+
+                # TODO have bot wait 5 ish mins before leaving
+
+                if not player.is_playing:
+                    await player.play()
+
+            except Exception as error:
+                print(error)
+
+        else:
+            pass
+
+    # Pause current song
+    @commands.command(name='Pause')
+    async def Pause(self, ctx):
+        # TODO Pause song
+        pass
+
+    # Resumes playback of song
+    @commands.command(name='Resume', aliases=['unpause'])
+    async def Resume(self, ctx):
+        # TODO resume playback of song
+        # TODO check if song is currently paused
+        pass
+
+    # Skips current song
+    @commands.command(name='Skip', aliases=['next'])
+    async def Skip(self, ctx):
         player = self.client.music.player_manager.get(ctx.guild.id)
 
-        # TODO if bot isnt in channel, join
+        # TODO Check if bot is in vc
 
-        try:
+        if not ctx.author.voice or (player.is_connected and ctx.author.voice.channel.id != int(player.channel_id)):
+            return await ctx.send('You\'re not in my voice channel!')
+        else:
+            await player.skip()
+            await ctx.send('✅ Skipped current track.')
+        # TODO Check if bot is playing and if the ctx.author is in the voice channel with bot
 
-            query = f'ytsearch:{query}'
-            results = await player.node.get_tracks(query)
-            tracks = results['tracks'][0:1]
-            track = tracks[0]
-            print(track)
+    # Shows songs in queue
+    @commands.command(name='Queue')
+    async def Queue(self, ctx):
+        # TODO WORKING JUST NEED TO FORMAT IN AN EMBED
+        player = self.client.music.player_manager.get(ctx.guild.id)
 
-            embed = discord.Embed(
-                title=f'**{track["info"]["title"]}**', url=f'{track["info"]["uri"]}', color=embedColor)
-            embed.set_thumbnail(url=f'{track["info"]["uri"]}')
-            embed.set_footer(text='Requested by {ctx.message.author.nick}')
-            await ctx.channel.send(embed=embed)
+        queue = []
 
-            time.sleep(1.5)
+        for song in player.queue:
+            queue.append(song)
 
-            player.add(requester=ctx.author.id, track=track)
+        # if not queue:
+        #     await ctx.send('Music queue is empty.')
+        # else:
+        #     embed = discord.Embed(title='Songs In Queue', color=embedColor)
 
-            # TODO add queue system here and have bot wait 5 ish mins before leaving
-
-            if not player.is_playing:
-                await player.play()
-
-        except Exception as error:
-            print(error)
+        await ctx.send(queue)
 
     # Leaves Voice Channel
-    @commands.command(aliases=['leave', 'stop'])
-    async def disconnect(self, ctx):
+    @commands.command(name='Disconnect', aliases=['leave', 'stop'])
+    async def Disconnect(self, ctx):
         player = self.client.music.player_manager.get(ctx.guild.id)
 
         # TODO fix if bot is not connected
 
         if not player.is_connected:
             return await ctx.send('Bot is not in a voice channel!')
-
-        # TODO Test other user not in channel disconnecting bot
 
         if not ctx.author.voice or (player.is_connected and ctx.author.voice.channel.id != int(player.channel_id)):
             return await ctx.send('You\'re not in my voice channel!')

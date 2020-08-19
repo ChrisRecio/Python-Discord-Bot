@@ -20,7 +20,7 @@ class ServerInfo(commands.Cog):
             title=f"Message For {target}", description=f"Ping time for bot is {round(self.client.latency * 1000)} ms", color=embedColor)
         await ctx.send(embed=embed)
 
-    @commands.command(name="serverInfo")
+    @commands.command(name="ServerInfo")
     async def ServerInfo(self, ctx):
         server = ctx.message.guild
 

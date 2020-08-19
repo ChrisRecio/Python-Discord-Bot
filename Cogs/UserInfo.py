@@ -16,7 +16,7 @@ class UserInfo(commands.Cog):
         print('UserInfo Cog Loaded')
 
     # Returns mentioned user's avatar or sender if none provided
-    @commands.command(name="avatar")
+    @commands.command(name="Avatar")
     async def Avatar(self, ctx, target: Optional[discord.Member] = None):
         if target is None:
             target = ctx.author
@@ -27,8 +27,8 @@ class UserInfo(commands.Cog):
         await ctx.send(embed=embed)
 
     # Returns mentioned user's profile info or sender if none provided
-    @commands.command(name="userInfo", aliases=["accountInfo"])
-    async def AccountInfo(self, ctx, target: Optional[discord.Member] = None):
+    @commands.command(name="UserInfo", aliases=["AccountInfo"])
+    async def UserInfo(self, ctx, target: Optional[discord.Member] = None):
         if target is None:
             target = ctx.author
 
@@ -39,11 +39,11 @@ class UserInfo(commands.Cog):
         embed.add_field(name='Status', value=target.status, inline=True)
         embed.add_field(name='Game', value=target.activity, inline=True)
         embed.add_field(name='Account Created', value=target.created_at.__format__(
-            '%A, %d. %B %Y @ %H:%M:%S'))
+            '%A, %d. %B %Y @ %H:%M:%S'), inline=True)
         embed.add_field(name='Join Date', value=target.joined_at.__format__(
             '%A, %d. %B %Y @ %H:%M:%S'))
         embed.set_footer(
-            text=f'Requested by {ctx.message.author.nick}')
+            text=f'Requested by: {ctx.message.author.display_name}')
 
         await ctx.send(embed=embed)
 

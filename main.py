@@ -1,9 +1,9 @@
-import json
 import os
 import discord
 from discord.ext import commands
 from discord.ext.commands import CommandNotFound
 from dotenv import load_dotenv
+
 
 load_dotenv()
 TOKEN = os.environ['DiscordBotToken']
