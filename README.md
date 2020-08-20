@@ -14,7 +14,7 @@ In order to run this container you'll need docker installed.
 
 In order for the music functions to work, you will need a Lavalink server.
 
--[Lavalink](https://github.com/Frederikam/Lavalink)
+- [Lavalink](https://github.com/Frederikam/Lavalink)
 
 ### Usage
 
