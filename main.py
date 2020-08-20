@@ -18,7 +18,7 @@ async def on_ready():
     print('Bot Has Successfully Started')
 
 
-# LOAD AND UNLOAD INDIVIDUAL COGS
+# LOAD, UNLOAD AND RELOAD INDIVIDUAL COGS
 # @client.command()
 # async def load(ctx, extension):
 #     client.load_extension(f'Cogs.{extension}')

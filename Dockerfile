@@ -5,6 +5,7 @@ RUN pip install --upgrade pip && \
     pip install discord.py[voice] && \
     pip install lavalink && \
     pip install python-dotenv && \
+    pip install validator-collection && \
     pip install requests
 
 CMD [ "python", "./main.py" ]

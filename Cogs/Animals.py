@@ -70,9 +70,9 @@ class Animals(commands.Cog):
         await ctx.send(embed=embed)
 
     # Gets a picture of a bird
-    @commands.command(name="Birb", aliases=['randomBird', 'Random Bird', 'randomBirb', 'Random Birb'])
+    @commands.command(name="Bird", aliases=['randomBird', 'Random Bird', 'Birb', 'randomBirb', 'Random Birb'])
     @commands.cooldown(rate=1, per=1.5, type=commands.BucketType.user)
-    async def Birb(self, ctx):
+    async def Bird(self, ctx):
         url = "https://api.alexflipnote.dev/birb"
         r = requests.get(url)
         data = r.json()
