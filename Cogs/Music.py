@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands, tasks
 import lavalink
-import asyncio
 import os
 import re
 from dotenv import load_dotenv
@@ -17,6 +16,7 @@ embedColor = 0x7a34eb  # (122, 52, 235)
 # LavaLink Docs
 # https://lavalink.readthedocs.io/en/latest/lavalink.html
 
+# TODO Make bot leave after 5 mins afk without killing the rest of the music functionality
 # TODO Try making bot wait 5 mins before leaving after finishing queue
 # TODO Test to see if LavaNode Reconnects with activity after timing out
 
@@ -42,20 +42,12 @@ class Music(commands.Cog):
             if not player.is_playing:
                 player.queue.clear()
                 await player.stop()
-                await ctx.send(f'Joined `{vc.name}` the `{vc.name}` voice channel.')
+                await ctx.send(f'Joined the `{vc.name}` voice channel.')
                 await self.connect_to(ctx.guild.id, str(vc.id))
-                await asyncio.sleep(300)
-                if not player.is_playing:
-                    await ctx.send(f'Left due to innactivity.')
-                    await self.connect_to(ctx.guild.id, None)
 
             if player.is_connected and player.is_playing:
                 await ctx.send(f'Moved to the `{vc.name}` voice channel.')
                 await self.connect_to(ctx.guild.id, str(vc.id))
-                await asyncio.sleep(300)
-                if not player.is_playing:
-                    await ctx.send(f'Left `{vc.name}` due to innactivity.')
-                    await self.connect_to(ctx.guild.id, None)
         else:
             await ctx.send('You are not currently connected to a voice channel!', delete_after=10)
 
@@ -120,11 +112,7 @@ class Music(commands.Cog):
     async def NowPlaying(self, ctx):
         player = self.client.music.player_manager.get(ctx.guild.id)
 
-        # Check if bot is connected to a voice channel
-        if not player:
-            return await ctx.send('Bot is not in a voice channel!', delete_after=10)
-        elif not player.is_connected:
-            return await ctx.send('Bot is not in a voice channel!', delete_after=10)
+        await self.isBotInChannel(ctx)
 
         # Check if bot is playing audio
         if not player.is_playing:
@@ -145,66 +133,51 @@ class Music(commands.Cog):
     async def Pause(self, ctx):
         player = self.client.music.player_manager.get(ctx.guild.id)
 
-        # Check if bot is connected to a voice channel
-        if not player:
-            return await ctx.send('Bot is not in a voice channel!', delete_after=10)
-        elif not player.is_connected:
-            return await ctx.send('Bot is not in a voice channel!', delete_after=10)
+        await self.isBotInChannel(ctx)
 
         # Check if bot is playing audio
         if not player.is_playing:
             return await ctx.send('Bot is not playing anything!', delete_after=10)
 
         # Check if user calling skip is in the same voice channel as bot
-        if not ctx.author.voice or (player.is_connected and ctx.author.voice.channel.id != int(player.channel_id)):
-            return await ctx.send('You\'re not in my voice channel!', delete_after=10)
-        else:
-            await ctx.send('Song paused!')
-            await player.set_pause(True)
+        await self.isRequesterInChannelWithBoth(ctx)
+
+        await ctx.send('Song paused!')
+        await player.set_pause(True)
 
     # Resumes playback of song
     @commands.command(name='Resume', aliases=['unpause'])
     async def Resume(self, ctx):
         player = self.client.music.player_manager.get(ctx.guild.id)
 
-        # Check if bot is connected to a voice channel
-        if not player:
-            return await ctx.send('Bot is not in a voice channel!', delete_after=10)
-        elif not player.is_connected:
-            return await ctx.send('Bot is not in a voice channel!', delete_after=10)
+        await self.isBotInChannel(ctx)
 
         # Check if bot is playing audio
         if not player.is_playing:
             return await ctx.send('Bot is not playing anything!', delete_after=10)
 
         # Check if user calling skip is in the same voice channel as bot
-        if not ctx.author.voice or (player.is_connected and ctx.author.voice.channel.id != int(player.channel_id)):
-            return await ctx.send('You\'re not in my voice channel!', delete_after=10)
-        else:
-            await ctx.send('Song resumed!')
-            await player.set_pause(False)
+        await self.isRequesterInChannelWithBoth(ctx)
+
+        await ctx.send('Song resumed!')
+        await player.set_pause(False)
 
     # Skips current song
     @commands.command(name='Skip', aliases=['next'])
     async def Skip(self, ctx):
         player = self.client.music.player_manager.get(ctx.guild.id)
 
-        # Check if bot is connected to a voice channel
-        if not player:
-            return await ctx.send('Bot is not in a voice channel!', delete_after=10)
-        elif not player.is_connected:
-            return await ctx.send('Bot is not in a voice channel!', delete_after=10)
+        await self.isBotInChannel(ctx)
 
         # Check if bot is playing audio
         if not player.is_playing:
             return await ctx.send('Bot is not playing anything!', delete_after=10)
 
         # Check if user calling skip is in the same voice channel as bot
-        if not ctx.author.voice or (player.is_connected and ctx.author.voice.channel.id != int(player.channel_id)):
-            return await ctx.send('You\'re not in my voice channel!', delete_after=10)
-        else:
-            await player.skip()
-            await ctx.send('✅ Skipped current track.')
+        await self.isRequesterInChannelWithBoth(ctx)
+
+        await player.skip()
+        await ctx.send('✅ Skipped current track.')
 
     # Shows songs in queue
     @commands.command(name='Queue')
@@ -229,13 +202,8 @@ class Music(commands.Cog):
     async def Disconnect(self, ctx):
         player = self.client.music.player_manager.get(ctx.guild.id)
 
-        if not player:
-            return await ctx.send('Bot is not in a voice channel!', delete_after=10)
-        elif not player.is_connected:
-            return await ctx.send('Bot is not in a voice channel!', delete_after=10)
-
-        if not ctx.author.voice or (player.is_connected and ctx.author.voice.channel.id != int(player.channel_id)):
-            return await ctx.send('You\'re not in my voice channel!', delete_after=10)
+        await self.isBotInChannel(ctx)
+        await self.isRequesterInChannelWithBoth(ctx)
 
         player.queue.clear()
         await player.stop()
@@ -250,6 +218,20 @@ class Music(commands.Cog):
     async def connect_to(self, guild_id: int, channel_id: str):
         ws = self.client._connection._get_websocket(guild_id)
         await ws.voice_state(str(guild_id), channel_id)
+
+    async def isRequesterInChannelWithBoth(self, ctx):
+        player = self.client.music.player_manager.get(ctx.guild.id)
+
+        if not ctx.author.voice or (player.is_connected and ctx.author.voice.channel.id != int(player.channel_id)):
+            return await ctx.send('You\'re not in my voice channel!', delete_after=10)
+
+    async def isBotInChannel(self, ctx):
+        player = self.client.music.player_manager.get(ctx.guild.id)
+
+        if not player:
+            return await ctx.send('Bot is not in a voice channel!', delete_after=10)
+        elif not player.is_connected:
+            return await ctx.send('Bot is not in a voice channel!', delete_after=10)
 
     @commands.Cog.listener()
     async def on_ready(self):

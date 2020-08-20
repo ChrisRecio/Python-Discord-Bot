@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-embedColor = 0xffff00  # (255, 255, 0)
+embedColor = 0xff8400  # (255, 132, 0)
 
 
 class ServerInfo(commands.Cog):

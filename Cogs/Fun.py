@@ -1,8 +1,9 @@
-import random
-import time
 import discord
 from discord.ext import commands
 from discord.ext.commands import command, cooldown
+import random
+import time
+import requests
 from Utils import Responses
 
 embedColor = 0x42b0ff  # (66, 176, 255)
@@ -63,7 +64,6 @@ class Fun(commands.Cog):
         await ctx.send('```' + morseText + '```')
 
     # Coin Flip
-
     @commands.command(name='Coin Flip', aliases=['flip', 'coin'])
     async def CoinFlip(self, ctx):
         coinsides = ['Heads', 'Tails']
@@ -74,6 +74,14 @@ class Fun(commands.Cog):
     async def Lmgtfy(self, ctx, *, msg: str):
         lmgtfy = 'http://lmgtfy.com/?q='
         await ctx.send(lmgtfy + urllib.parse.quote_plus(msg.lower().strip()))
+
+    @commands.command(name='Meme')
+    async def Meme(self, ctx):
+        data = requests.get('https://meme-api.herokuapp.com/gimme').json()
+        embed = (discord.Embed(title=f":speech_balloon: r/{data['subreddit']} :", color=embedColor)
+                 .set_image(url=data['url'])
+                 .set_footer(text=data['postLink']))
+        await ctx.send(embed=embed)
 
 
 def setup(client):
