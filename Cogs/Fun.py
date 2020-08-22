@@ -4,6 +4,7 @@ from discord.ext.commands import command, cooldown
 import random
 import time
 import requests
+import urllib
 from Utils import Responses
 
 embedColor = 0x42b0ff  # (66, 176, 255)

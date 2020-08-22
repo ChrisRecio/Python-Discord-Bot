@@ -18,7 +18,6 @@ embedColor = 0x7a34eb  # (122, 52, 235)
 
 # TODO Make bot leave after 5 mins afk without killing the rest of the music functionality
 # TODO Try making bot wait 5 mins before leaving after finishing queue
-# TODO Test to see if LavaNode Reconnects with activity after timing out
 
 
 class Music(commands.Cog):
@@ -61,8 +60,7 @@ class Music(commands.Cog):
                 title='**Missing Argument**', description='The query argument is required.', color=embedColor)
             embed.add_field(
                 name='Usage', value='```.play <song name or url>```')
-            await ctx.channel.send(embed=embed, delete_after=10)
-            return
+            return await ctx.channel.send(embed=embed, delete_after=10)            
 
         player = self.client.music.player_manager.get(ctx.guild.id)
 
